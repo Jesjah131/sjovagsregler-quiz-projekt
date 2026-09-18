@@ -1,0 +1,9 @@
+// Slår ihop alla ämnesspecifika frågefiler till en gemensam QUESTIONS-array.
+const QUESTIONS = [
+  ...QUESTIONS_SJOVAGSREGLER,
+  ...QUESTIONS_LANTERNOR_SIGNALER,
+  ...QUESTIONS_NAVIGATION,
+  ...QUESTIONS_SAKERHET_LAG,
+  ...QUESTIONS_KOMMUNIKATION,
+  ...QUESTIONS_MASKINTEKNIK,
+];

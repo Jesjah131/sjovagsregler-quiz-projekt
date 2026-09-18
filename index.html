@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sjövägsregler — COLREG &amp; TSFS 2009:44</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600;700&family=Spectral+SC:wght@600&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="brandbar">
+        <div class="brand-left">
+          <svg class="brand-mark" viewBox="0 0 100 100">
+            <circle
+              cx="50"
+              cy="50"
+              r="44"
+              fill="none"
+              stroke="#a9752a"
+              stroke-width="1.4"
+              opacity="0.6"
+            />
+            <polygon points="50.0,12.0 56.5,50.0 50,50" fill="#f2c169" />
+            <polygon points="50.0,12.0 50,50 43.5,50.0" fill="#a9752a" />
+            <polygon points="88.0,50.0 50.0,56.5 50,50" fill="#f2c169" />
+            <polygon points="88.0,50.0 50,50 50.0,43.5" fill="#a9752a" />
+            <polygon points="50.0,88.0 43.5,50.0 50,50" fill="#f2c169" />
+            <polygon points="50.0,88.0 50,50 56.5,50.0" fill="#a9752a" />
+            <polygon points="12.0,50.0 50.0,43.5 50,50" fill="#f2c169" />
+            <polygon points="12.0,50.0 50,50 50.0,56.5" fill="#a9752a" />
+            <polygon
+              points="65.6,34.4 52.7,52.7 50,50 47.3,47.3"
+              fill="#f6efd8"
+            />
+            <polygon
+              points="65.6,65.6 47.3,52.7 50,50 52.7,47.3"
+              fill="#f6efd8"
+            />
+            <polygon
+              points="34.4,65.6 47.3,47.3 50,50 52.7,52.7"
+              fill="#f6efd8"
+            />
+            <polygon
+              points="34.4,34.4 52.7,47.3 50,50 47.3,52.7"
+              fill="#f6efd8"
+            />
+            <circle
+              cx="50"
+              cy="50"
+              r="6.2"
+              fill="#0d2b3e"
+              stroke="#f2c169"
+              stroke-width="1.6"
+            />
+            <circle cx="50" cy="50" r="2.1" fill="#f2c169" />
+          </svg>
+          <div>
+            <p class="brand-title">Sjövägsregler</p>
+            <p class="brand-sub">
+              Quizets frågor bygger på svenska och internationella regler,
+              föreskrifter och vedertagen nautisk kunskap för fritids- och
+              yrkessjöfart bl.a COLREG och TFSF 2009:44
+            </p>
+          </div>
+        </div>
+        <div class="lightdots" title="Babord / Styrbord / Topplanterna">
+          <span class="dot red"></span><span class="dot white"></span
+          ><span class="dot green"></span>
+        </div>
+      </div>
+
+      <!-- ============ START / SETUP SCREEN ============ -->
+      <div id="screen-start" class="panel">
+        <div class="start-head-row">
+          <h2 class="section-title" style="margin:0;">Välj läge</h2>
+          <button class="btn ghost small" onclick="showProgressScreen()">
+            📊 Mina framsteg
+          </button>
+        </div>
+
+        <div class="mode-grid">
+          <div class="mode-card" id="card-train" onclick="selectMode('train')">
+            <div class="mode-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#e0a437"
+                stroke-width="1.8"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <circle cx="12" cy="12" r="5.5" />
+                <circle cx="12" cy="12" r="2" fill="#e0a437" stroke="none" />
+              </svg>
+            </div>
+            <div class="mode-card-body">
+              <span class="tag">LÄGE 01</span>
+              <h3>Träningsläge</h3>
+              <p>
+                Direkt facit och förklaring efter varje fråga. Välj vilka ämnen
+                du vill öva på.
+              </p>
+            </div>
+          </div>
+          <div class="mode-card" id="card-exam" onclick="selectMode('exam')">
+            <div class="mode-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#e0a437"
+                stroke-width="1.8"
+              >
+                <circle cx="12" cy="9" r="6" />
+                <path d="M9 14.5 7 22l5-3 5 3-2-7.5" />
+              </svg>
+            </div>
+            <div class="mode-card-body">
+              <span class="tag">LÄGE 02</span>
+              <h3>Provläge</h3>
+              <p>
+                Svara på alla frågor i följd utan facit. Resultat och
+                regelgenomgång visas på slutet.
+              </p>
+            </div>
+          </div>
+          <div class="mode-card" id="card-calc" onclick="selectMode('calc')">
+            <div class="mode-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#e0a437"
+                stroke-width="1.8"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 12 15 7" />
+                <circle cx="12" cy="12" r="1.3" fill="#e0a437" stroke="none" />
+              </svg>
+            </div>
+            <div class="mode-card-body">
+              <span class="tag">LÄGE 03</span>
+              <h3>Navigationsräkning</h3>
+              <p>
+                Räkneuppgifter med fart/distans/tid, kompasskurskorrigering och
+                fyrpejling.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div id="calc-options" class="hidden">
+          <h2 class="section-title" style="margin-top: 26px">
+            Typ av uppgifter
+          </h2>
+          <p class="lede">
+            Bocka för det du vill räkna på. Lämna alla tomma för att öva på
+            allt. Talen slumpas varje gång.
+          </p>
+          <div class="cat-grid" id="calc-type-grid">
+            <label class="cat-item"
+              ><input type="checkbox" value="speed" /><span
+                class="swatch"
+                style="background: #4a90a4"
+              ></span
+              >Fart, distans &amp; tid</label
+            >
+            <label class="cat-item"
+              ><input type="checkbox" value="course" /><span
+                class="swatch"
+                style="background: #7a5c9e"
+              ></span
+              >Kompasskurskorrigering</label
+            >
+            <label class="cat-item"
+              ><input type="checkbox" value="bearing" /><span
+                class="swatch"
+                style="background: #d9822b"
+              ></span
+              >Fyrpejling (dubbla vinkeln vid bogen)</label
+            >
+          </div>
+          <div class="field-row" style="margin-top: 20px">
+            <label for="calc-count">Antal uppgifter</label>
+            <input
+              type="range"
+              id="calc-count"
+              min="5"
+              max="30"
+              step="5"
+              value="10"
+              oninput="document.getElementById('calc-count-val').textContent=this.value"
+            />
+            <span class="range-val" id="calc-count-val">10</span>
+          </div>
+        </div>
+
+        <div id="train-options" class="hidden">
+          <h2 class="section-title" style="margin-top: 26px">
+            Certifikat (valfritt)
+          </h2>
+          <p class="lede">
+            Välj vilket certifikat du siktar på för att se ämnena indelade efter
+            dess delar — eller "Alla ämnen" för fri filtrering över hela banken.
+          </p>
+          <div class="cert-row" id="train-cert-row"></div>
+
+          <label class="recall-toggle">
+            <input type="checkbox" id="recall-mode-toggle" />
+            <span class="recall-toggle-text">
+              <strong>💡 Fundera-läge</strong>
+              <span
+                >Alternativen döljs till du bett om dem — tänk igenom ditt eget
+                svar först, för djupare inlärning.</span
+              >
+            </span>
+          </label>
+
+          <h2 class="section-title" style="margin-top: 22px">Ämnen</h2>
+          <p class="lede">
+            Bocka för det du vill träna på. Lämna alla tomma för att öva på allt
+            inom vald vy.
+          </p>
+          <div id="cat-grid"></div>
+        </div>
+
+        <div id="exam-options" class="hidden">
+          <h2 class="section-title" style="margin-top: 26px">Certifikat</h2>
+          <p class="lede">
+            Simulera provet för ett specifikt certifikat, eller välj "Alla
+            ämnen" för en bred blandning av hela sjökunskapsbanken.
+          </p>
+          <div class="cert-row" id="exam-cert-row"></div>
+          <div class="field-row">
+            <label for="exam-count">Antal frågor</label>
+            <input
+              type="range"
+              id="exam-count"
+              min="10"
+              max="40"
+              step="5"
+              value="20"
+              oninput="document.getElementById('exam-count-val').textContent=this.value"
+            />
+            <span class="range-val" id="exam-count-val">20</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="start-btn" onclick="startQuiz()" disabled>
+            Starta
+          </button>
+        </div>
+      </div>
+
+      <!-- ============ QUIZ SCREEN ============ -->
+      <div id="screen-quiz" class="panel hidden">
+        <div class="progress-row">
+          <span class="progress-txt" id="progress-txt">Fråga 1 av 20</span>
+          <span class="progress-txt" id="mode-txt">TRÄNINGSLÄGE</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width: 5%"></div>
+          <span class="progress-boat" id="progress-boat" style="left: 5%"
+            >⛵</span
+          >
+        </div>
+
+        <div class="q-tags">
+          <span class="q-tag" id="q-cat-tag">Kategori</span>
+          <span class="q-tag rule" id="q-rule-tag">Regel</span>
+        </div>
+
+        <p class="q-text" id="q-text">Frågetext…</p>
+
+        <div class="sound-box hidden" id="sound-box">
+          <button
+            class="sound-btn"
+            id="sound-play-btn"
+            onclick="playCurrentSound()"
+          >
+            ▶
+          </button>
+          <div>
+            <div class="sound-meta">LJUDSIGNAL — TRYCK FÖR ATT SPELA UPP</div>
+            <div class="sound-pattern" id="sound-pattern-label"></div>
+          </div>
+        </div>
+
+        <div class="symbol-box hidden" id="symbol-box"></div>
+
+        <div class="think-box hidden" id="think-box">
+          <div class="think-icon">💡</div>
+          <p class="think-text">Fundera på ditt svar innan du går vidare.</p>
+          <button class="btn ghost" onclick="revealOptions()">
+            Visa alternativ
+          </button>
+        </div>
+
+        <div class="options" id="options"></div>
+
+        <div class="feedback hidden" id="feedback"></div>
+
+        <div class="self-assess hidden" id="self-assess">
+          <p class="self-assess-q">
+            Hade du rätt tanke innan du såg alternativen?
+          </p>
+          <div class="self-assess-btns">
+            <button
+              class="btn ghost small"
+              onclick="recordSelfAssessment('ja', this)"
+            >
+              🙂 Ja
+            </button>
+            <button
+              class="btn ghost small"
+              onclick="recordSelfAssessment('nastan', this)"
+            >
+              😐 Nästan
+            </button>
+            <button
+              class="btn ghost small"
+              onclick="recordSelfAssessment('nej', this)"
+            >
+              🙁 Nej
+            </button>
+          </div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="btn ghost small" id="quit-btn" onclick="quitToStart()">
+            Avbryt
+          </button>
+          <div style="display: flex; gap: 10px">
+            <button class="btn ghost" id="check-btn" onclick="checkAnswer()">
+              Kontrollera
+            </button>
+            <button class="btn" id="next-btn" onclick="nextQuestion()" disabled>
+              Nästa →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ RESULTS SCREEN ============ -->
+      <div id="screen-results" class="panel hidden">
+        <div class="score-hero">
+          <div
+            class="score-badge"
+            id="score-badge"
+            style="--badge-color: var(--amber)"
+          >
+            <svg viewBox="0 0 100 120" width="72" height="86">
+              <path
+                d="M30 55 L20 110 L50 95 L80 110 L70 55Z"
+                fill="var(--badge-color)"
+                opacity="0.85"
+              />
+              <circle
+                cx="50"
+                cy="42"
+                r="32"
+                fill="var(--navy)"
+                stroke="var(--badge-color)"
+                stroke-width="6"
+              />
+              <path
+                d="M50 22 L58 38 76 40 63 52 66 70 50 61 34 70 37 52 24 40 42 38Z"
+                fill="var(--badge-color)"
+              />
+            </svg>
+          </div>
+          <div class="score-num" id="score-num">0/0</div>
+          <div class="score-label" id="score-label">RÄTT SVAR</div>
+          <p class="score-note" id="score-note"></p>
+          <p class="score-note recall-stat hidden" id="recall-stat"></p>
+        </div>
+
+        <h2 class="section-title">Regler att repetera</h2>
+        <p class="lede">
+          Baserat på dina fel, sorterat efter var du behöver öva mest.
+        </p>
+        <div class="rule-review" id="rule-review"></div>
+
+        <div id="wrong-review" style="margin-top: 26px"></div>
+
+        <div class="actions">
+          <button class="btn" onclick="location.reload()">Kör igen</button>
+          <button class="btn ghost" onclick="restartSameSettings()">
+            Samma inställningar
+          </button>
+        </div>
+      </div>
+
+      <!-- ============ CALC QUIZ SCREEN ============ -->
+      <div id="screen-calc" class="panel hidden">
+        <div class="progress-row">
+          <span class="progress-txt" id="calc-progress-txt"
+            >Uppgift 1 av 10</span
+          >
+          <span class="progress-txt">NAVIGATIONSRÄKNING</span>
+        </div>
+        <div class="progress-bar">
+          <div
+            class="progress-fill"
+            id="calc-progress-fill"
+            style="width: 5%"
+          ></div>
+          <span class="progress-boat" id="calc-progress-boat" style="left: 5%"
+            >⛵</span
+          >
+        </div>
+
+        <div class="q-tags">
+          <span class="q-tag" id="calc-type-tag">Fart, distans &amp; tid</span>
+        </div>
+
+        <p class="q-text" id="calc-q-text">Frågetext…</p>
+
+        <div class="calc-given" id="calc-given"></div>
+
+        <div class="calc-input-row">
+          <input
+            type="number"
+            step="any"
+            class="calc-input"
+            id="calc-input"
+            placeholder="Ditt svar"
+            onkeydown="if(event.key==='Enter')checkCalcAnswer()"
+          />
+          <span class="calc-unit" id="calc-unit">enhet</span>
+        </div>
+
+        <div class="calc-solution hidden" id="calc-solution"></div>
+
+        <div class="quiz-actions">
+          <button class="btn ghost small" onclick="quitCalcToStart()">
+            Avbryt
+          </button>
+          <div style="display: flex; gap: 10px">
+            <button
+              class="btn ghost"
+              id="calc-check-btn"
+              onclick="checkCalcAnswer()"
+            >
+              Kontrollera
+            </button>
+            <button
+              class="btn"
+              id="calc-next-btn"
+              onclick="nextCalcQuestion()"
+              disabled
+            >
+              Nästa →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ CALC RESULTS SCREEN ============ -->
+      <div id="screen-calc-results" class="panel hidden">
+        <div class="score-hero">
+          <div
+            class="score-badge"
+            id="calc-score-badge"
+            style="--badge-color: var(--amber)"
+          >
+            <svg viewBox="0 0 100 120" width="72" height="86">
+              <path
+                d="M30 55 L20 110 L50 95 L80 110 L70 55Z"
+                fill="var(--badge-color)"
+                opacity="0.85"
+              />
+              <circle
+                cx="50"
+                cy="42"
+                r="32"
+                fill="var(--navy)"
+                stroke="var(--badge-color)"
+                stroke-width="6"
+              />
+              <path
+                d="M50 22 L58 38 76 40 63 52 66 70 50 61 34 70 37 52 24 40 42 38Z"
+                fill="var(--badge-color)"
+              />
+            </svg>
+          </div>
+          <div class="score-num" id="calc-score-num">0/0</div>
+          <div class="score-label">RÄTT SVAR</div>
+          <p class="score-note" id="calc-score-note"></p>
+        </div>
+
+        <h2 class="section-title">Resultat per uppgiftstyp</h2>
+        <div class="rule-review" id="calc-rule-review"></div>
+
+        <div class="actions">
+          <button class="btn" onclick="location.reload()">Kör igen</button>
+          <button class="btn ghost" onclick="restartSameSettings()">
+            Samma inställningar
+          </button>
+        </div>
+      </div>
+
+      <!-- ============ PROGRESS SCREEN ============ -->
+      <div id="screen-progress" class="panel hidden">
+        <div class="start-head-row">
+          <h2 class="section-title" style="margin:0;">Mina framsteg</h2>
+          <button class="btn ghost small" onclick="hideProgressScreen()">
+            ← Tillbaka
+          </button>
+        </div>
+        <p class="lede">
+          Sparas lokalt i din webbläsare och finns kvar mellan sessioner.
+        </p>
+
+        <div id="progress-empty" class="empty-note hidden">
+          Inga quiz genomförda ännu. Kör en träningsrunda eller ett prov för
+          att börja bygga upp din statistik.
+        </div>
+
+        <div id="progress-content" class="hidden">
+          <div class="progress-stats-grid" id="progress-stats-grid"></div>
+
+          <h2 class="section-title" style="margin-top: 28px">
+            Ämnen — ackumulerat resultat
+          </h2>
+          <p class="lede">
+            Alla svar du någonsin gett, sorterat efter var du behöver öva mest.
+          </p>
+          <div class="rule-review" id="progress-cat-review"></div>
+
+          <h2 class="section-title" style="margin-top: 28px">Historik</h2>
+          <div class="progress-history" id="progress-history"></div>
+
+          <div class="actions">
+            <button class="btn ghost" onclick="resetProgress()">
+              Rensa sparad statistik
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <footer class="credit">
+        SJÖVÄGSREGLER · COLREG 1972 · TSFS 2009:44 · ENDAST FÖR ÖVNINGSSYFTE
+      </footer>
+    </div>
+
+    <script src="js/data/categories.js"></script>
+    <script src="js/data/questions-sjovagsregler.js"></script>
+    <script src="js/data/questions-lanternor-signaler.js"></script>
+    <script src="js/data/questions-navigation.js"></script>
+    <script src="js/data/questions-sakerhet-lag.js"></script>
+    <script src="js/data/questions-kommunikation.js"></script>
+    <script src="js/data/questions-maskinteknik.js"></script>
+    <script src="js/data/questions-index.js"></script>
+    <script src="js/certifications.js"></script>
+    <script src="js/progress-store.js"></script>
+    <script src="js/setup-ui.js"></script>
+    <script src="js/progress-ui.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/quiz-engine.js"></script>
+    <script src="js/calc-engine.js"></script>
+  </body>
+</html>
