@@ -23,6 +23,10 @@ const CATEGORIES = [
   {id:'meteorologi', name:'Meteorologi',                       color:'#4a6d9c'},
   {id:'sjoratt',   name:'Sjörätt & miljöregler',                color:'#5c4a7d'},
   {id:'flaggsignaler', name:'Flaggsignaler & semafor',           color:'#8a3ffc'},
+  {id:'kompass',      name:'Kompass, kurser & instrument',        color:'#4a90a4'},
+  {id:'sjomanskap',   name:'Sjömanskap, knopar & manövrering',    color:'#8c6a3f'},
+  {id:'miljo',        name:'Miljö & allemansrätt',                 color:'#2e7d5b'},
+  {id:'lagar',        name:'Lagar (Sjölag, SjöTF, Fartygssäkerhet)', color:'#5c4a7d'},
   {id:'mask-motorprincip', name:'Motorprinciper & motortyper (Del 1)',        color:'#5c7a8c', group:'maskin'},
   {id:'mask-verkgrad',     name:'Verkningsgrad, luft & gasväxling (Del 1)',   color:'#8c7a3f', group:'maskin'},
   {id:'mask-bransle',      name:'Bränsle & förbränningsegenskaper (Del 1)',   color:'#6e3f3f', group:'maskin'},
@@ -50,6 +54,7 @@ const ICON_PATHS = {
   flag:    '<path d="M6 21V4M6 4h12l-4 4 4 4H6"/>',
 };
 const CATEGORY_ICONS = {
+  kompass:'compass', sjomanskap:'anchor', miljo:'cloud', lagar:'scale',
   sjokort:'compass', fyrar:'light', lanternor:'light', dag:'flag', flaggsignaler:'flag',
   def:'rule', 'fart-risk':'rule', farled:'rule', kurs:'rule', ansvar:'rule', sikt:'rule',
   ljud:'sound', 'lots-fiske':'anchor', segelregler:'sail',

@@ -51,7 +51,7 @@ const QUESTIONS_LANTERNOR_SIGNALER = [
  opts:['En cylinder där den bäst syns','En romb','En kon med spetsen uppåt','Ett kryss','Två svarta bollar','En kon med spetsen nedåt'],
  correct:0, exp:'Regel 28: fartyg begränsat av djupgåendet kan, utöver ljus enligt Regel 23, visa en cylinder som dagsignal där den bäst syns.'},
 {id:54,cat:'dag',rule:'Regel 26',q:'Ett fiskefartyg (ej trål) under gång ska enligt Regel 26 visa vilken dagsignal?',
- opts:['Två koner med topparna mot varandra, lodrätt ovanför varandra','En cylinder','En svart boll','En romb','Två svarta bollar','Två koner med topparna mot varandra'],
+ opts:['Två koner med topparna mot varandra, lodrätt ovanför varandra','En cylinder','En svart boll','En romb','Två svarta bollar','En kon med spetsen uppåt'],
  correct:0, exp:'Regel 26(c)(i): fartyg som fiskar (annat än trål) visar dagtid två koner med topparna mot varandra, lodrätt ovanför varandra.'},
 // ---------- LJUDSIGNALER (32-37, spelbara) ----------
 {id:55,cat:'ljud',rule:'Regel 34',q:'Vad betyder EN kort ljudsignal enligt Regel 34, i sikte av annat fartyg?',

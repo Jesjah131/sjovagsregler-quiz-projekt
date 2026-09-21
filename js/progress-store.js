@@ -26,7 +26,7 @@ function saveProgress(data) {
 
 // Sparar en avslutad quiz-session (träning eller prov) samt uppdaterar
 // ackumulerad statistik per ämneskategori.
-function recordQuizSession({ mode, cert, answers }) {
+function recordQuizSession({ mode, cert, topic, answers }) {
   const data = loadProgress();
   const total = answers.length;
   const correct = answers.filter((a) => a.correct).length;
@@ -35,6 +35,7 @@ function recordQuizSession({ mode, cert, answers }) {
     type: 'quiz',
     mode,
     cert: cert || null,
+    topic: topic || null,
     total,
     correct,
     date: new Date().toISOString(),

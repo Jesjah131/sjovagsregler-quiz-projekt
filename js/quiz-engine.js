@@ -1,15 +1,22 @@
 // Frågevisning, svarshantering, Fundera-läge, resultatsida.
+//
+// Modell: `current` är index för frågan som visas och `answers[i]` är det
+// sparade svaret på fråga i. Finns ett svar för den visade frågan är den
+// "besvarad" — i träning/mängdträning låses den och facit visas, i prov kan
+// svaret ändras tills man lämnat frågan.
 
-let checked_ = false;
 let selectedIdx = null;
 let currentOptions = [];   // shuffled [{text, isCorrect}] for the question being shown
 const LETTERS = ['A','B','C','D','E','F'];
 
+function isLocked(){
+  return mode !== 'exam' && !!answers[current];
+}
+
 function renderQuestion(){
-  checked_ = false;
-  selectedIdx = null;
   const q = quizQuestions[current];
   const total = quizQuestions.length;
+  const saved = answers[current];
 
   document.getElementById('progress-txt').textContent = `Fråga ${current+1} av ${total}`;
   document.getElementById('progress-fill').style.width = `${((current)/total)*100}%`;
@@ -35,39 +42,86 @@ function renderQuestion(){
     symbolBox.classList.add('hidden');
   }
 
-  // Build a freshly-shuffled option order every time the question is shown,
-  // so the correct answer's letter is randomized rather than clustering on one letter.
-  currentOptions = shuffle(q.opts.map((o,i)=>({text:o, isCorrect:i===q.correct})));
+  // Ny fråga: slumpa alternativens ordning så rätt bokstav varierar.
+  // Redan besvarad fråga: visa exakt samma ordning som förra gången.
+  if(saved){
+    currentOptions = saved.options;
+    selectedIdx = saved.sel;
+  } else {
+    currentOptions = shuffle(q.opts.map((o,i)=>({text:o, isCorrect:i===q.correct})));
+    selectedIdx = null;
+  }
 
   const optsEl = document.getElementById('options');
   optsEl.innerHTML = currentOptions.map((o,i)=>`
-    <div class="opt" data-idx="${i}" onclick="selectOption(${i})">
+    <button type="button" class="opt" data-idx="${i}" onclick="selectOption(${i})">
       <span class="letter">${LETTERS[i]}</span>
       <span class="opt-text">${o.text}</span>
-    </div>
+    </button>
   `).join('');
 
   const thinkBox = document.getElementById('think-box');
-  const useRecall = (mode === 'train' && recallMode);
+  const useRecall = (mode === 'train' && recallMode && !saved);
   optsEl.classList.remove('reveal-in');
-  if(useRecall){
-    thinkBox.classList.remove('hidden');
-    optsEl.classList.add('hidden');
-    document.getElementById('check-btn').classList.add('hidden');
-  } else {
-    thinkBox.classList.add('hidden');
-    optsEl.classList.remove('hidden');
-  }
+  thinkBox.classList.toggle('hidden', !useRecall);
+  optsEl.classList.toggle('hidden', useRecall);
 
-  document.getElementById('feedback').classList.add('hidden');
-  document.getElementById('feedback').classList.remove('ok','bad');
-  document.getElementById('feedback').innerHTML = '';
+  const fb = document.getElementById('feedback');
+  fb.classList.add('hidden');
+  fb.classList.remove('ok','bad');
+  fb.innerHTML = '';
   document.getElementById('self-assess').classList.add('hidden');
   document.querySelectorAll('#self-assess .btn').forEach(b=>b.classList.remove('selected'));
-  document.getElementById('check-btn').disabled = false;
-  if(!useRecall) document.getElementById('check-btn').classList.remove('hidden');
-  document.getElementById('next-btn').disabled = true;
-  document.getElementById('next-btn').textContent = (current === total-1) ? 'Se resultat →' : 'Nästa →';
+
+  paintOptions();
+  if(isLocked()) showFeedback(saved, q);
+  updateNav();
+  window.scrollTo(0,0);
+}
+
+// Färglägger alternativen efter läge: låst = rätt/fel, annars bara valt.
+function paintOptions(){
+  const locked = isLocked();
+  const correctIdx = currentOptions.findIndex(o=>o.isCorrect);
+  document.querySelectorAll('.opt').forEach(el=>{
+    const idx = parseInt(el.dataset.idx,10);
+    el.classList.remove('selected','correct','incorrect');
+    if(locked){
+      el.disabled = true;
+      if(idx === correctIdx) el.classList.add('correct');
+      else if(idx === selectedIdx) el.classList.add('incorrect');
+    } else {
+      el.disabled = false;
+      if(idx === selectedIdx) el.classList.add('selected');
+    }
+  });
+}
+
+function showFeedback(a, q){
+  if(mode === 'exam') return;
+  const fb = document.getElementById('feedback');
+  fb.classList.remove('hidden','ok','bad');
+  fb.classList.add(a.correct ? 'ok' : 'bad');
+  fb.innerHTML = `<b>${a.correct ? 'Rätt.' : 'Fel.'}</b> ${q.exp}`;
+  if(mode === 'train' && recallMode){
+    document.getElementById('self-assess').classList.remove('hidden');
+    document.querySelectorAll('#self-assess .btn').forEach(b=>{
+      b.classList.toggle('selected', b.dataset.value === a.selfAssessment);
+    });
+  }
+}
+
+// Primärknappen växlar: Kontrollera (träning) → Nästa. I prov och
+// mängdträning är det alltid "Nästa". Bakåtknappen är av på första frågan.
+function updateNav(){
+  const btn = document.getElementById('primary-btn');
+  const last = current === quizQuestions.length - 1;
+  const nextLabel = last ? 'Se resultat →' : 'Nästa →';
+  const locked = isLocked();
+  document.getElementById('back-btn').disabled = current === 0;
+  if(locked || mode === 'exam' || mode === 'drill') btn.textContent = nextLabel;
+  else btn.textContent = 'Kontrollera';
+  btn.disabled = !locked && selectedIdx === null;
 }
 
 function revealOptions(){
@@ -75,61 +129,63 @@ function revealOptions(){
   const optsEl = document.getElementById('options');
   optsEl.classList.remove('hidden');
   optsEl.classList.add('reveal-in');
-  document.getElementById('check-btn').classList.remove('hidden');
 }
 
 function selectOption(i){
-  if(checked_) return;
+  if(isLocked()) return;
   selectedIdx = i;
-  document.querySelectorAll('.opt').forEach(el=>{
-    el.classList.toggle('selected', parseInt(el.dataset.idx,10)===i);
-  });
+  paintOptions();
+  // Mängdträning: rätta direkt vid tryck, ingen separat "Kontrollera".
+  if(mode === 'drill') checkAnswer();
+  else updateNav();
+}
+
+// Sparar svaret på den visade frågan (behåller ev. självskattning).
+function recordAnswer(){
+  const q = quizQuestions[current];
+  const correctIdx = currentOptions.findIndex(o=>o.isCorrect);
+  const prev = answers[current];
+  answers[current] = {
+    qId:q.id, cat:q.cat, rule:q.rule,
+    chosenText: currentOptions[selectedIdx].text,
+    correctText: currentOptions[correctIdx].text,
+    correct: currentOptions[selectedIdx].isCorrect,
+    options: currentOptions, sel: selectedIdx,
+    selfAssessment: prev && prev.selfAssessment
+  };
 }
 
 function checkAnswer(){
-  const q = quizQuestions[current];
-  if(selectedIdx === null){
-    // In exam mode allow skipping without selection isn't ideal; nudge user
-    document.querySelectorAll('.opt').forEach(el=>el.style.outline='1px solid rgba(200,39,44,0.5)');
-    setTimeout(()=>document.querySelectorAll('.opt').forEach(el=>el.style.outline=''),400);
-    return;
-  }
-  checked_ = true;
-  const isCorrect = currentOptions[selectedIdx].isCorrect;
-  const correctDisplayIdx = currentOptions.findIndex(o=>o.isCorrect);
-  answers.push({
-    qId:q.id, cat:q.cat, rule:q.rule,
-    chosenText: currentOptions[selectedIdx].text,
-    correctText: currentOptions[correctDisplayIdx].text,
-    correct:isCorrect
-  });
-
-  document.querySelectorAll('.opt').forEach(el=>{
-    const idx = parseInt(el.dataset.idx,10);
-    el.onclick = null;
-    if(idx === correctDisplayIdx) el.classList.add('correct');
-    else if(idx === selectedIdx) el.classList.add('incorrect');
-  });
-
-  if(mode === 'train'){
-    const fb = document.getElementById('feedback');
-    fb.classList.remove('hidden','ok','bad');
-    fb.classList.add(isCorrect ? 'ok' : 'bad');
-    fb.innerHTML = `<b>${isCorrect ? 'Rätt.' : 'Fel.'}</b> ${q.exp}`;
-    if(recallMode){
-      document.getElementById('self-assess').classList.remove('hidden');
-    }
-  }
-
-  document.getElementById('check-btn').disabled = true;
-  document.getElementById('next-btn').disabled = false;
+  if(selectedIdx === null || isLocked()) return;
+  recordAnswer();
+  paintOptions();
+  showFeedback(answers[current], quizQuestions[current]);
+  updateNav();
+  const fb = document.getElementById('feedback');
+  if(!fb.classList.contains('hidden')) fb.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
 function recordSelfAssessment(value, btn){
-  const last = answers[answers.length-1];
-  if(last) last.selfAssessment = value;
+  const a = answers[current];
+  if(a) a.selfAssessment = value;
   document.querySelectorAll('#self-assess .btn').forEach(b=>b.classList.remove('selected'));
   btn.classList.add('selected');
+}
+
+// Höger knapp: Kontrollera eller Nästa beroende på läge/tillstånd.
+function primaryAction(){
+  if(isLocked()) return nextQuestion();
+  if(selectedIdx === null) return;
+  if(mode === 'exam'){ recordAnswer(); return nextQuestion(); }
+  checkAnswer();
+}
+
+function prevQuestion(){
+  if(current === 0) return;
+  // Provläge: spara ev. valt svar på frågan man lämnar.
+  if(mode === 'exam' && selectedIdx !== null) recordAnswer();
+  current--;
+  renderQuestion();
 }
 
 function nextQuestion(){
@@ -145,10 +201,14 @@ function nextQuestion(){
    RESULTS
 ===================================================================== */
 function showResults(){
-  document.getElementById('screen-quiz').classList.add('hidden');
-  document.getElementById('screen-results').classList.remove('hidden');
+  showOnly('screen-results');
 
-  recordQuizSession({ mode, cert: mode === 'train' ? trainCert : examCert, answers });
+  recordQuizSession({
+    mode,
+    cert: {train: trainCert, exam: examCert}[mode] || null,
+    topic: quizTopic,
+    answers
+  });
 
   const totalQ = quizQuestions.length;
   const correctN = answers.filter(a=>a.correct).length;
@@ -197,7 +257,7 @@ function showResults(){
       const barColor = r.p < 50 ? 'var(--port-red)' : (r.p < 80 ? 'var(--amber)' : 'var(--stbd-green)');
       return `
         <div class="rule-row">
-          <div>
+          <div class="rr-main">
             <span class="rr-name">${c.name}</span>
             <span class="rr-rule">${r.correct}/${r.total} rätt i quizet</span>
           </div>
