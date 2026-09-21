@@ -39,7 +39,13 @@ const DRILL_GROUPS = [
     id: 'ljudsignaler',
     name: 'Ljudsignaler (Regel 34 & 35)',
     color: '#1c8a54',
-    ids: idRange(55, 64),
+    ids: [...idRange(55, 64), ...idRange(639, 642)],
+  },
+  {
+    id: 'vajning-bild',
+    name: 'Väjningsplikt — bedöm situationen på bild',
+    color: '#7a5c9e',
+    ids: idRange(626, 638),
   },
 ];
 

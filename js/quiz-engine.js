@@ -25,14 +25,6 @@ function renderQuestion(){
   document.getElementById('q-rule-tag').textContent = q.rule;
   document.getElementById('q-text').textContent = q.q;
 
-  const soundBox = document.getElementById('sound-box');
-  if(q.sound){
-    soundBox.classList.remove('hidden');
-    document.getElementById('sound-pattern-label').textContent = patternLabel(q.sound.pattern);
-  } else {
-    soundBox.classList.add('hidden');
-  }
-
   const symbolBox = document.getElementById('symbol-box');
   if(q.svg){
     symbolBox.innerHTML = q.svg;

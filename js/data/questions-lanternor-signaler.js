@@ -1,4 +1,92 @@
 // Lanternor, dagersignaler, ljudsignaler, lots- och fiskefartyg
+//
+// Ljudsignaler visas som en bild (korta/långa stötar som staplar, klocka för
+// ankar-/grundstötningssignal) istället för uppspelbart ljud — användaren ska
+// kunna avgöra signalen enbart utifrån visualiseringen.
+const SND_W = 260, SND_H = 120;
+
+function sndFrame() {
+  return `<rect x="1" y="1" width="${SND_W - 2}" height="${SND_H - 2}" rx="10" fill="#ffffff" stroke="#9fb8c4" stroke-width="1.5"/>`;
+}
+
+// pattern: array av 'S' (kort stöt) / 'L' (lång stöt) — ritas som staplar,
+// korta smala och långa breda, i följd med jämnt mellanrum. Skalas ned
+// automatiskt om fler/längre stötar (t.ex. fyra stötar) annars inte får plats.
+function sndBarsScene(pattern) {
+  let BH = 36, GAP = 14, SHORT_W = 30, LONG_W = 92;
+  const maxW = SND_W - 24;
+  const rawTotal = pattern.reduce((a, s) => a + (s === 'S' ? SHORT_W : LONG_W), 0) + GAP * (pattern.length - 1);
+  if (rawTotal > maxW) {
+    const scale = maxW / rawTotal;
+    BH *= scale; GAP *= scale; SHORT_W *= scale; LONG_W *= scale;
+  }
+  const widths = pattern.map((s) => (s === 'S' ? SHORT_W : LONG_W));
+  const totalW = widths.reduce((a, b) => a + b, 0) + GAP * (pattern.length - 1);
+  let x = (SND_W - totalW) / 2;
+  const y = (SND_H - BH) / 2;
+  const bars = pattern
+    .map((s, i) => {
+      const w = widths[i];
+      const rect = `<rect x="${x.toFixed(1)}" y="${y}" width="${w}" height="${BH}" rx="5" fill="#111111"/>`;
+      x += w + GAP;
+      return rect;
+    })
+    .join('');
+  return `<svg viewBox="0 0 ${SND_W} ${SND_H}" style="width:100%;max-width:260px;display:block;">${sndFrame()}${bars}</svg>`;
+}
+
+function sndBellIcon(x, y, scale = 1) {
+  return `<g transform="translate(${x},${y}) scale(${scale})">
+    <path d="M-15,10 C-15,-8 -8,-18 0,-18 C8,-18 15,-8 15,10 L19,16 L-19,16 Z" fill="#111111"/>
+    <circle cx="0" cy="21" r="3.2" fill="#111111"/>
+    <rect x="-3" y="-23" width="6" height="6" rx="1.5" fill="#111111"/>
+  </g>`;
+}
+
+// Klocksignal (ankarliggande fartyg): en klockikon + text om hastig ringning.
+function sndBellScene() {
+  return `<svg viewBox="0 0 ${SND_W} ${SND_H}" style="width:100%;max-width:260px;display:block;">${sndFrame()}
+    ${sndBellIcon(130, 54, 1.5)}
+    <text x="130" y="100" font-size="11" font-family="Arial, sans-serif" font-weight="700" fill="#0d2b3e" text-anchor="middle">HASTIG RINGNING (~5 SEK)</text>
+  </svg>`;
+}
+
+// Grundstötningssignal: 3 slag, hastig ringning, 3 slag till.
+function sndBell3Scene() {
+  const tick = (x) => `<circle cx="${x}" cy="54" r="6" fill="#111111"/>`;
+  return `<svg viewBox="0 0 ${SND_W} ${SND_H}" style="width:100%;max-width:260px;display:block;">${sndFrame()}
+    ${tick(26)}${tick(44)}${tick(62)}
+    ${sndBellIcon(142, 54, 1.1)}
+    ${tick(218)}${tick(236)}${tick(254 > SND_W - 6 ? SND_W - 6 : 254)}
+    <text x="130" y="100" font-size="10" font-family="Arial, sans-serif" font-weight="700" fill="#0d2b3e" text-anchor="middle">3 SLAG — HASTIG RINGNING — 3 SLAG</text>
+  </svg>`;
+}
+
+const SCENE_SND_S = sndBarsScene(['S']);
+const SCENE_SND_SS = sndBarsScene(['S', 'S']);
+const SCENE_SND_SSS = sndBarsScene(['S', 'S', 'S']);
+const SCENE_SND_SSSSS = sndBarsScene(['S', 'S', 'S', 'S', 'S']);
+const SCENE_SND_L = sndBarsScene(['L']);
+const SCENE_SND_LL = sndBarsScene(['L', 'L']);
+const SCENE_SND_LSS = sndBarsScene(['L', 'S', 'S']);
+const SCENE_SND_LLS = sndBarsScene(['L', 'L', 'S']);
+const SCENE_SND_LLSS = sndBarsScene(['L', 'L', 'S', 'S']);
+const SCENE_SND_LSLS = sndBarsScene(['L', 'S', 'L', 'S']);
+const SCENE_SND_LSSS = sndBarsScene(['L', 'S', 'S', 'S']);
+const SCENE_SND_BELL = sndBellScene();
+const SCENE_SND_BELL3 = sndBell3Scene();
+
+// Delade svarsalternativ för Regel 35 (fartygsläge i nedsatt sikt) — samma
+// fem alternativ återanvänds för signalerna (a),(b),(c),(g),(h) med olika
+// rätt svar, så att bilden (mönstret) är det enda som avgör rätt svar.
+const LJUD_STATUS_OPTS = [
+  'Maskindrivet fartyg under gång, som gör fart genom vattnet',
+  'Maskindrivet fartyg under gång, men utan fart genom vattnet',
+  'Fartyg med begränsad manöverförmåga, fartyg utan kommando, fartyg begränsat av sitt djupgående, segelfartyg, fiskande fartyg eller bogserande/bogserat fartyg',
+  'Fartyg till ankars',
+  'Fartyg på grund',
+];
+
 const QUESTIONS_LANTERNOR_SIGNALER = [
 {id:38,cat:'lanternor',rule:'Regel 21/23',q:'Vilka lanternor ska ett maskindrivet fartyg under 50 meter under gång föra enligt Regel 23?',
  opts:['Endast ett runtlysande vitt ljus','Ett toppljus, sidoljus (rött babord/grönt styrbord) och akterljus','Endast röda och gröna sidoljus, inget toppljus','Två runtlysande gula ljus','Gult sidoljus istället för rött eller grönt','Sidoljusens lysvinkel är 135° istället för 112,5°'],
@@ -53,47 +141,77 @@ const QUESTIONS_LANTERNOR_SIGNALER = [
 {id:54,cat:'dag',rule:'Regel 26',q:'Ett fiskefartyg (ej trål) under gång ska enligt Regel 26 visa vilken dagsignal?',
  opts:['Två koner med topparna mot varandra, lodrätt ovanför varandra','En cylinder','En svart boll','En romb','Två svarta bollar','En kon med spetsen uppåt'],
  correct:0, exp:'Regel 26(c)(i): fartyg som fiskar (annat än trål) visar dagtid två koner med topparna mot varandra, lodrätt ovanför varandra.'},
-// ---------- LJUDSIGNALER (32-37, spelbara) ----------
-{id:55,cat:'ljud',rule:'Regel 34',q:'Vad betyder EN kort ljudsignal enligt Regel 34, i sikte av annat fartyg?',
+// ---------- LJUDSIGNALER (32-37, visas som bild) ----------
+{id:55,cat:'ljud',rule:'Regel 34',q:'Bilden visar en ljudsignal given i sikte av ett annat fartyg. Vad betyder den, enligt Regel 34?',
+ svg:SCENE_SND_S,
  opts:['"Jag ändrar min kurs till styrbord"','"Jag ändrar min kurs till babord"','"Jag backar"','Nödsignal','En lång signal följt av en kort, istället för en lång följt av två korta','Tre korta signaler betyder att fartyget ökar farten framåt'],
- correct:0, sound:{pattern:['S']},
+ correct:0,
  exp:'Regel 34(a): en kort signal betyder "Jag ändrar min kurs till styrbord."'},
-{id:56,cat:'ljud',rule:'Regel 34',q:'Vad betyder TVÅ korta ljudsignaler enligt Regel 34?',
+{id:56,cat:'ljud',rule:'Regel 34',q:'Bilden visar en ljudsignal given i sikte av ett annat fartyg. Vad betyder den, enligt Regel 34?',
+ svg:SCENE_SND_SS,
  opts:['"Jag ändrar min kurs till styrbord"','"Jag ändrar min kurs till babord"','"Jag backar min maskin"','"Jag förstår inte din avsikt"','Signalerna gäller enbart i klart väder, inte vid nedsatt sikt','Signalen ska ges var 5:e minut istället för var 2:a minut'],
- correct:1, sound:{pattern:['S','S']},
+ correct:1,
  exp:'Regel 34(a): två korta signaler betyder "Jag ändrar min kurs till babord."'},
-{id:57,cat:'ljud',rule:'Regel 34',q:'Vad betyder TRE korta ljudsignaler enligt Regel 34?',
+{id:57,cat:'ljud',rule:'Regel 34',q:'Bilden visar en ljudsignal given i sikte av ett annat fartyg. Vad betyder den, enligt Regel 34?',
+ svg:SCENE_SND_SSS,
  opts:['"Jag ändrar min kurs till babord"','"Jag har begränsad manöverförmåga"','"Jag backar min maskin (arbetar med maskin akterut)"','"Fara — kolla dina avsikter"','En lång signal följt av en kort, istället för en lång följt av två korta','Tre korta signaler betyder att fartyget ökar farten framåt'],
- correct:2, sound:{pattern:['S','S','S']},
+ correct:2,
  exp:'Regel 34(a): tre korta signaler betyder "Jag backar min maskin" / arbetar med propellern akterut.'},
-{id:58,cat:'ljud',rule:'Regel 34',q:'Vad betyder minst FEM korta, hastigt givna ljudsignaler enligt Regel 34(d)?',
+{id:58,cat:'ljud',rule:'Regel 34',q:'Bilden visar minst fem korta signaler, hastigt givna, i sikte av ett annat fartyg. Vad betyder detta enligt Regel 34(d)?',
+ svg:SCENE_SND_SSSSS,
  opts:['Hälsningssignal mellan fartyg','Tveksamhets- eller varningssignal — man förstår inte det andra fartygets avsikter eller åtgärder, eller anser dem otillräckliga','Signal för att lämna hamn','Signal om att fartyget ligger till ankars','Signalerna gäller enbart i klart väder, inte vid nedsatt sikt','En kort signal betyder att fartyget ligger till ankars'],
- correct:1, sound:{pattern:['S','S','S','S','S']},
+ correct:1,
  exp:'Regel 34(d): fem eller fler korta signaler, snabbt givna, är en tveksamhets-/varningssignal när man tvivlar på om det andra fartyget vidtar tillräcklig åtgärd.'},
-{id:59,cat:'ljud',rule:'Regel 34',q:'Enligt Regel 34(e) — vad betyder EN lång ljudsignal när ett fartyg närmar sig en skarp krök eller ett område med skymd sikt i en farled?',
+{id:59,cat:'ljud',rule:'Regel 34',q:'Bilden visar den ljudsignal ett fartyg ger när det närmar sig en skarp krök eller ett område med skymd sikt i en trång farled, enligt Regel 34(e). Vad betyder den?',
+ svg:SCENE_SND_L,
  opts:['"Jag stannar"','Varnar andra fartyg om att man närmar sig krökningen; ska besvaras av mötande fartyg med samma signal','"Jag är på grund"','"Nödsignal"','En kort signal betyder att fartyget ligger till ankars','Signalerna gäller enbart i klart väder, inte vid nedsatt sikt'],
- correct:1, sound:{pattern:['L']},
+ correct:1,
  exp:'Regel 9(f)/34(e): en lång signal ges vid skarp krök eller skymd sikt, och besvaras med en lång signal av fartyg som hör den från andra sidan.'},
-{id:60,cat:'ljud',rule:'Regel 35',q:'Vilken ljudsignal ska ett maskindrivet fartyg under gång och görande fart genom vattnet ge i nedsatt sikt, enligt Regel 35(a), minst var annan minut?',
- opts:['Två korta signaler','En lång signal','Tre korta signaler','En lång och två korta signaler','Signalen ges var 30:e sekund istället för var 2:a minut','En kort signal betyder att fartyget ligger till ankars'],
- correct:1, sound:{pattern:['L']},
+{id:60,cat:'ljud',rule:'Regel 35',q:'Bilden visar en ljudsignal som ett fartyg ger i nedsatt sikt, enligt Regel 35. Vilket fartygsläge signalerar just denna signal?',
+ svg:SCENE_SND_L,
+ opts:LJUD_STATUS_OPTS,
+ correct:0,
  exp:'Regel 35(a): maskindrivet fartyg under gång och görande fart genom vattnet ger en lång signal minst var annan minut.'},
-{id:61,cat:'ljud',rule:'Regel 35',q:'Vilken ljudsignal ger ett maskindrivet fartyg som är under gång men har stannat och inte gör fart genom vattnet, enligt Regel 35(b)?',
- opts:['En lång signal','Två långa signaler i följd, med ca 2 sekunders mellanrum','Fem korta signaler','Ingen signal krävs','En kort signal betyder att fartyget ligger till ankars','Signalerna gäller enbart i klart väder, inte vid nedsatt sikt'],
- correct:1, sound:{pattern:['L','L']},
+{id:61,cat:'ljud',rule:'Regel 35',q:'Bilden visar en ljudsignal som ett fartyg ger i nedsatt sikt, enligt Regel 35. Vilket fartygsläge signalerar just denna signal?',
+ svg:SCENE_SND_LL,
+ opts:LJUD_STATUS_OPTS,
+ correct:1,
  exp:'Regel 35(b): ett maskindrivet fartyg under gång utan fart genom vattnet ger två på varandra följande långa signaler med ca två sekunders mellanrum, minst var annan minut.'},
-{id:62,cat:'ljud',rule:'Regel 35',q:'Vilken ljudsignal ska ett fartyg med begränsad manöverförmåga, ett fartyg utan kommando, ett segelfartyg, ett fiskande fartyg eller ett bogserande/bogserat fartyg ge i nedsatt sikt enligt Regel 35(c)?',
- opts:['En lång signal','En lång signal följd av två korta signaler, minst var annan minut','Tre korta signaler','Fem korta signaler','Två långa signaler betyder att fartyget ändrar kurs till babord','Signalen ska ges var 5:e minut istället för var 2:a minut'],
- correct:1, sound:{pattern:['L','S','S']},
- exp:'Regel 35(c): dessa fartygskategorier ger, i stället för signalerna i (a)/(b), en lång signal följd av två korta signaler minst var annan minut.'},
-{id:63,cat:'ljud',rule:'Regel 35',q:'Hur signalerar ett fartyg som ligger till ankars i nedsatt sikt enligt Regel 35(g)?',
- opts:['En lång signal var annan minut','Hastig ringning i klocka i cirka 5 sekunder minst var minut (samt gongong akter om fartyget är 100 m eller mer)','Tre korta signaler','Inget ljud krävs om fartyget har ankarlanterna tänd','Fyra korta signaler istället för fem','En lång signal följt av en kort, istället för en lång följt av två korta'],
- correct:1, sound:{pattern:['BELL']},
+{id:62,cat:'ljud',rule:'Regel 35',q:'Bilden visar en ljudsignal som ett fartyg ger i nedsatt sikt, enligt Regel 35. Vilket fartygsläge signalerar just denna signal?',
+ svg:SCENE_SND_LSS,
+ opts:LJUD_STATUS_OPTS,
+ correct:2,
+ exp:'Regel 35(c): dessa fartygskategorier (inklusive fartyg begränsat av sitt djupgående) ger, i stället för signalerna i (a)/(b), en lång signal följd av två korta signaler minst var annan minut.'},
+{id:63,cat:'ljud',rule:'Regel 35',q:'Bilden visar en ljudsignal som ett fartyg ger i nedsatt sikt, enligt Regel 35. Vilket fartygsläge signalerar just denna signal?',
+ svg:SCENE_SND_BELL,
+ opts:LJUD_STATUS_OPTS,
+ correct:3,
  exp:'Regel 35(g): ankrat fartyg ringer hastigt i klockan i cirka 5 sekunder minst var minut; fartyg om 100 m eller mer ger dessutom en gongongsignal akter om klocksignalen.'},
-{id:64,cat:'ljud',rule:'Regel 35',q:'Hur signalerar ett fartyg som gått på grund i nedsatt sikt enligt Regel 35(h)?',
- opts:['Endast klocksignal som ett ankrat fartyg','Klocksignal som ankrat fartyg, samt dessutom tre tydligt åtskilda slag i klockan strax före och efter den hastiga ringningen','En lång signal var 30:e sekund','Fem korta signaler följt av tystnad','Två långa signaler betyder att fartyget ändrar kurs till babord','Tre korta signaler betyder att fartyget ökar farten framåt'],
- correct:1, sound:{pattern:['BELL3']},
+{id:64,cat:'ljud',rule:'Regel 35',q:'Bilden visar en ljudsignal som ett fartyg ger i nedsatt sikt, enligt Regel 35. Vilket fartygsläge signalerar just denna signal?',
+ svg:SCENE_SND_BELL3,
+ opts:LJUD_STATUS_OPTS,
+ correct:4,
  exp:'Regel 35(h): fartyg på grund ger klocksignal som ett ankrat fartyg, men ger dessutom tre tydligt åtskilda slag omedelbart före och efter den hastiga ringningen.'},
+{id:639,cat:'ljud',rule:'Regel 9(e)/34(c)',q:'I en trång farled vill ett fartyg hinna om ett annat och ger ljudsignalen på bilden. Vad betyder den?',
+ svg:SCENE_SND_LLS,
+ opts:['"Jag avser att hinna om på ditt styrbords sida"','"Jag avser att hinna om på ditt babords sida"','"Jag håller på med en omkörning, håll din kurs"','Nödsignal — omkörning avbryts','Fem korta signaler betyder tveksamhet inför omkörningen','En lång signal följt av en kort, istället för två långa följt av en kort'],
+ correct:0,
+ exp:'Regel 9(e)/34(c)(i): i en trång farled ger det omkörande fartyget två långa signaler följt av en kort för att signalera avsikt att köra om på det andra fartygets styrbords sida.'},
+{id:640,cat:'ljud',rule:'Regel 9(e)/34(c)',q:'I en trång farled vill ett fartyg hinna om ett annat och ger ljudsignalen på bilden. Vad betyder den?',
+ svg:SCENE_SND_LLSS,
+ opts:['"Jag avser att hinna om på ditt babords sida"','"Jag avser att hinna om på ditt styrbords sida"','"Jag ändrar min kurs till babord"','Nödsignal — omkörning avbryts','Fem korta signaler betyder tveksamhet inför omkörningen','En lång signal följt av två korta, istället för två långa följt av två korta'],
+ correct:0,
+ exp:'Regel 9(e)/34(c)(ii): i en trång farled ger det omkörande fartyget två långa signaler följt av två korta för att signalera avsikt att köra om på det andra fartygets babords sida.'},
+{id:641,cat:'ljud',rule:'Regel 9(e)/34(c)',q:'Det omkörda fartyget i en trång farled svarar med ljudsignalen på bilden på ett omkörningsförslag enligt Regel 34(c). Vad betyder svaret?',
+ svg:SCENE_SND_LSLS,
+ opts:['Man samtycker till omkörningen','Man vägrar omkörningen — vänta','Man har inte hört signalen och ber om upprepning','Nödsignal','Fem korta signaler istället för denna signal betyder att man samtycker','Signalen ges bara i god sikt, aldrig i en trång farled'],
+ correct:0,
+ exp:'Regel 9(e)/34(c)(iii): om det omkörda fartyget samtycker till en föreslagen omkörning ska det ge signalen lång–kort–lång–kort (Morse-bokstaven "C"). Är man tveksam ska man istället ge tveksamhetssignalen enligt Regel 34(d) (minst fem korta).'},
+{id:642,cat:'ljud',rule:'Regel 35(d)',q:'Bilden visar den ljudsignal ett bemannat bogserat fartyg (eller det sista fartyget i en bogsering av flera) ger i nedsatt sikt, omedelbart efter bogserfartygets egen signal. Enligt vilken regel, och hur ofta minst?',
+ svg:SCENE_SND_LSSS,
+ opts:['Regel 35(d) — minst var annan minut','Regel 35(c) — minst var 30:e sekund','Regel 35(a) — minst var minut','Regel 35(g) — endast en gång vid avgång','Denna signal ges bara av bogserfartyget, inte av det bogserade fartyget','Signalen ges bara i god sikt, aldrig i nedsatt sikt'],
+ correct:0,
+ exp:'Regel 35(d): ett bemannat bogserat fartyg (eller det sista fartyget om flera bogseras) ger, om möjligt omedelbart efter bogserfartygets signal, en lång signal följt av tre korta minst var annan minut.'},
 {id:65,cat:'ljud',rule:'Regel 36',q:'Om ett fartyg vill väcka ett annat fartygs uppmärksamhet enligt Regel 36, vad bör undvikas?',
  opts:['Att använda ljus eller ljudsignal','Signaler som kan förväxlas med något annat i reglerna tillåtet signal, t.ex. nöd- eller manöversignaler, eller blänkande ljus mot navigationsbrygga som kan blända','Att använda VHF','Att göra något alls','En lång signal följt av en kort, istället för en lång följt av två korta','Fyra korta signaler istället för fem'],
  correct:1, exp:'Regel 36: fartyg får ge signal för att väcka uppmärksamhet, men ska undvika signaler som kan förväxlas med andra signaler i reglerna, och undvika bländande ljus mot brygga.'},

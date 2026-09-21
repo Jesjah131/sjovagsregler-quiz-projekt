@@ -6,7 +6,6 @@ let quizQuestions = [];
 let current = 0;
 let answers = []; // {qId, chosen, correct}
 let recallMode = false; // "Fundera-läge" — dölj alternativen tills begärt
-let audioCtx = null;
 
 /* =====================================================================
    CERTIFIKATSPÅR — grupperar befintliga ämneskategorier efter

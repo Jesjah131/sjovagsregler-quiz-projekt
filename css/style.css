@@ -82,15 +82,9 @@
   .dot{
     width:12px;height:12px;border-radius:50%;
     box-shadow:0 0 10px currentColor, 0 0 18px currentColor;
-    animation:lanternpulse 2.6s ease-in-out infinite;
   }
   .dot.red{background:var(--port-red);color:var(--port-red);}
-  .dot.green{background:var(--stbd-green);color:var(--stbd-green);animation-delay:.4s;}
-  .dot.white{animation-delay:.8s;}
-  @keyframes lanternpulse{
-    0%,100%{opacity:.75;transform:scale(1);}
-    50%{opacity:1;transform:scale(1.18);}
-  }
+  .dot.green{background:var(--stbd-green);color:var(--stbd-green);}
   .dot.white{background:var(--white-light);color:var(--white-light);}
   @media (min-width:700px){
     .brandbar{padding:14px 18px 22px;margin-bottom:28px;flex-wrap:wrap;gap:14px;}
@@ -103,7 +97,7 @@
     .dot{width:15px;height:15px;}
   }
   @media (prefers-reduced-motion:reduce){
-    .dot,.think-icon,.score-badge{animation:none;}
+    .think-icon,.score-badge{animation:none;}
     *{scroll-behavior:auto !important;}
   }
 
@@ -308,22 +302,6 @@
     margin:0 0 18px;
   }
   @media (min-width:700px){ .q-text{font-size:1.35rem;margin-bottom:22px;} }
-
-  .sound-box{
-    display:flex;align-items:center;gap:14px;
-    background:rgba(255,255,255,0.03);border:1px solid var(--navy-line);
-    border-radius:var(--radius);padding:12px 14px;margin-bottom:18px;
-  }
-  .sound-btn{
-    width:56px;height:56px;border-radius:50%;border:1px solid var(--amber);
-    background:transparent;color:var(--amber);cursor:pointer;flex:none;
-    display:flex;align-items:center;justify-content:center;font-size:1.3rem;
-    transition:transform .08s, background .12s;
-  }
-  .sound-btn:hover{background:rgba(224,164,55,0.12);}
-  .sound-btn:active{transform:scale(.94);background:rgba(224,164,55,0.22);}
-  .sound-meta{font-family:var(--mono);font-size:.72rem;color:var(--foam-dim);}
-  .sound-pattern{color:var(--white-light);font-size:.95rem;margin-top:2px;letter-spacing:.5px;}
 
   .symbol-box{display:flex;justify-content:center;margin-bottom:18px;}
   .symbol-box svg{filter:drop-shadow(0 2px 6px rgba(0,0,0,0.35));max-width:100%;height:auto;}
