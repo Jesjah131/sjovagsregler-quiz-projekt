@@ -230,17 +230,17 @@ function generateCalcProblem(types){
   return genBearingProblem();
 }
 
-function startCalcSession(){
-  const checked = Array.from(document.querySelectorAll('#calc-type-grid input:checked')).map(i=>i.value);
-  const types = checked.length ? checked : ['speed','course','bearing'];
-  const n = parseInt(document.getElementById('calc-count').value,10);
+// typeId: en uppgiftstyp ('speed' | 'course' | 'bearing') eller 'all' för blandat.
+function startCalcSession(typeId){
+  const types = typeId === 'all' ? Object.keys(CALC_TYPES) : [typeId];
+  mode = 'calc';
+  quizTopic = typeId;
+  lastRun = () => startCalcSession(typeId);
   calcQuestions = [];
-  for(let i=0;i<n;i++) calcQuestions.push(generateCalcProblem(types));
+  for(let i=0;i<calcCount;i++) calcQuestions.push(generateCalcProblem(types));
   calcCurrent = 0;
   calcAnswers = [];
-  document.getElementById('screen-start').classList.add('hidden');
-  document.getElementById('screen-calc-results').classList.add('hidden');
-  document.getElementById('screen-calc').classList.remove('hidden');
+  showOnly('screen-calc');
   renderCalcQuestion();
 }
 
@@ -274,9 +274,10 @@ function renderCalcQuestion(){
   sol.classList.add('hidden');
   sol.classList.remove('ok','bad');
   sol.innerHTML = '';
-  document.getElementById('calc-check-btn').disabled = false;
-  document.getElementById('calc-next-btn').disabled = true;
+  document.getElementById('calc-check-btn').classList.remove('hidden');
+  document.getElementById('calc-next-btn').classList.add('hidden');
   document.getElementById('calc-next-btn').textContent = (calcCurrent===total-1) ? 'Se resultat →' : 'Nästa →';
+  window.scrollTo(0,0);
 }
 
 function checkCalcAnswer(){
@@ -307,8 +308,10 @@ function checkCalcAnswer(){
     : `<div class="cs-verdict">Fel. Ditt svar: ${displayGiven} — Rätt svar: ${displayCorrect}</div>`;
   sol.innerHTML = verdict + q.solution.map(s=>`<div class="cs-step">${s}</div>`).join('');
 
-  document.getElementById('calc-check-btn').disabled = true;
-  document.getElementById('calc-next-btn').disabled = false;
+  document.getElementById('calc-check-btn').classList.add('hidden');
+  document.getElementById('calc-next-btn').classList.remove('hidden');
+  input.blur(); // fäll ihop tangentbordet så facit syns
+  sol.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
 function nextCalcQuestion(){
@@ -321,8 +324,7 @@ function nextCalcQuestion(){
 }
 
 function showCalcResults(){
-  document.getElementById('screen-calc').classList.add('hidden');
-  document.getElementById('screen-calc-results').classList.remove('hidden');
+  showOnly('screen-calc-results');
 
   recordCalcSession({ answers: calcAnswers });
 

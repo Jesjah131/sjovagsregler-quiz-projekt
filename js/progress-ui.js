@@ -16,10 +16,22 @@ function formatSessionDate(iso) {
   return d.toLocaleDateString('sv-SE') + ' ' + d.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
 }
 
+// Namn på ämnet/området som övades, om det sparades med sessionen.
+function sessionTopicName(s) {
+  if (!s.topic) return '';
+  if (s.topic === 'all') return 'Alla ämnen';
+  if (s.mode === 'drill') {
+    const g = DRILL_GROUPS.find((x) => x.id === s.topic);
+    return g ? g.name : '';
+  }
+  return catMap[s.topic] ? catMap[s.topic].name : '';
+}
+
 function sessionLabel(s) {
   if (s.type === 'calc') return 'Navigationsräkning';
-  if (s.mode === 'train') return 'Träningsläge';
-  return 'Provläge';
+  const base = s.mode === 'train' ? 'Träningsläge' : s.mode === 'drill' ? 'Mängdträning' : 'Provläge';
+  const topic = sessionTopicName(s);
+  return topic ? `${base} · ${topic}` : base;
 }
 
 function showProgressScreen() {
