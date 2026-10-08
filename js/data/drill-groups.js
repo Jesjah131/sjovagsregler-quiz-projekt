@@ -47,6 +47,32 @@ const DRILL_GROUPS = [
     color: '#7a5c9e',
     ids: idRange(626, 638),
   },
+  {
+    id: 'fyrkaraktarer',
+    name: 'Fyrkaraktärer — tidsaxelmönster',
+    color: '#d9822b',
+    ids: idRange(800, 815),
+  },
+  {
+    id: 'sjokortssymboler',
+    name: 'Sjökortssymboler — sjömärken, kardinalmärken & kartsymboler',
+    color: '#4a90a4',
+    ids: [
+      ...idRange(178, 186),
+      ...idRange(860, 870),
+      ...idRange(877, 884),
+      886,
+      ...idRange(887, 890),
+      ...idRange(898, 901),
+      ...idRange(902, 929),
+    ],
+  },
+  {
+    id: 'radarbilder',
+    name: 'Radarbilder — tolka skärmen',
+    color: '#8aa6b8',
+    ids: [...idRange(422, 433), 892, 893],
+  },
 ];
 
 function drillQuestionsFor(groupIds) {

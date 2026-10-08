@@ -388,6 +388,34 @@
   .calc-solution .cs-step{font-family:var(--mono);font-size:.9rem;color:var(--foam);padding:3px 0;overflow-wrap:anywhere;}
   .calc-solution .cs-verdict{font-family:var(--sans);font-weight:600;color:var(--white-light);margin-bottom:8px;}
 
+  /* ---------- fyrkaraktärer: tidsaxel-övning ---------- */
+  .fyr-axis{margin:18px 0 8px;}
+  .fyr-ruler{position:relative;height:20px;margin-bottom:4px;}
+  .fyr-ruler-label{position:absolute;top:0;transform:translateX(-50%);font-family:var(--mono);font-size:.72rem;color:var(--foam-dim);}
+  .fyr-row-caption{font-size:.8rem;color:var(--foam-dim);margin:10px 0 4px;}
+  .fyr-row{
+    display:flex;
+    width:100%;
+    height:46px;
+    border-radius:8px;
+    overflow:hidden;
+    border:1px solid var(--navy-line);
+    background:var(--navy-deep);
+    touch-action:none;
+    user-select:none;
+  }
+  .fyr-row-user{cursor:pointer;}
+  .fyr-cell{flex:1 1 0;height:100%;background:var(--navy-deep);border-right:1px solid rgba(255,255,255,0.04);}
+  .fyr-cell:last-child{border-right:none;}
+  .fyr-cell.on{background:var(--amber);}
+  .fyr-cell.on-correct{background:var(--white-light);}
+  .fyr-cell.match.was-on{background:var(--stbd-green);}
+  .fyr-cell.match.was-off{background:var(--navy-deep);}
+  .fyr-cell.mismatch.was-on{background:var(--port-red);}
+  .fyr-cell.mismatch.was-off{background:var(--port-red-dim);}
+  .fyr-row-actions{display:flex;justify-content:flex-end;margin-top:8px;}
+  .fyr-correct-wrap{margin-top:14px;}
+
   /* ---------- resultat ---------- */
   .score-hero{text-align:center;padding:6px 0 18px;}
   .score-badge{

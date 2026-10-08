@@ -185,6 +185,30 @@
               </p>
             </span>
           </button>
+          <button
+            type="button"
+            class="mode-card"
+            id="card-fyr"
+            onclick="selectMode('fyr')"
+          >
+            <span class="mode-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#e0a437"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              >
+                <circle cx="12" cy="10" r="5.5" />
+                <path d="M9 18.5h6M10 21h4" />
+              </svg>
+            </span>
+            <span class="mode-card-body">
+              <span class="tag">LÄGE 05</span>
+              <h3>Fyrkaraktärer</h3>
+              <p>Rita fyrens ljus/mörker-mönster själv på en tidsaxel.</p>
+            </span>
+          </button>
         </div>
 
         <!-- Träning: certifikat → tryck på ämne → start -->
@@ -239,6 +263,18 @@
           <h2 class="section-title">Tryck på en uppgiftstyp</h2>
           <p class="lede">Talen slumpas varje gång.</p>
           <div id="calc-type-grid" class="topic-list"></div>
+        </div>
+
+        <!-- Fyrkaraktärer: antal → tryck på "Blandat" eller en specifik karaktär → start -->
+        <div id="fyr-options" class="opt-section hidden">
+          <h2 class="section-title">Antal karaktärer</h2>
+          <div class="cert-row" id="fyr-count-row"></div>
+          <h2 class="section-title">Tryck på "Blandat" eller en specifik karaktär</h2>
+          <p class="lede">
+            Rita mönstret på tidsaxeln (klicka/dra för att tända rutor) och
+            rätta sedan mot facit.
+          </p>
+          <div id="fyr-type-grid" class="topic-list"></div>
         </div>
       </div>
 
@@ -500,6 +536,118 @@
         <div class="rule-review" id="calc-rule-review"></div>
       </div>
 
+      <!-- ============ FYRKARAKTÄRER SCREEN ============ -->
+      <div id="screen-fyr" class="panel hidden">
+        <div class="quiz-top">
+          <button
+            type="button"
+            class="icon-btn"
+            onclick="quitFyrToStart()"
+            aria-label="Avbryt och gå till start"
+          >
+            ✕
+          </button>
+          <div class="quiz-top-mid">
+            <span class="progress-txt" id="fyr-progress-txt"
+              >Karaktär 1 av 8</span
+            >
+            <span class="progress-txt" id="fyr-mode-txt">FYRKARAKTÄRER</span>
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="fyr-progress-fill" style="width: 5%"></div>
+          <span class="progress-boat" id="fyr-progress-boat" style="left: 5%"
+            >⛵</span
+          >
+        </div>
+
+        <div class="q-tags">
+          <span class="q-tag" id="fyr-label-tag">Fl(2) 10s</span>
+        </div>
+
+        <p class="q-text" id="fyr-desc">Beskrivning…</p>
+
+        <div class="fyr-axis">
+          <div class="fyr-ruler" id="fyr-ruler"></div>
+          <p class="fyr-row-caption">Din teckning (klicka eller dra för att tända/släcka)</p>
+          <div class="fyr-row fyr-row-user" id="fyr-user-track"></div>
+          <div class="fyr-row-actions">
+            <button class="btn ghost small" onclick="fyrClearTrack()">
+              Rensa
+            </button>
+          </div>
+          <div class="fyr-correct-wrap hidden" id="fyr-correct-wrap">
+            <p class="fyr-row-caption">Facit</p>
+            <div class="fyr-row fyr-row-correct" id="fyr-correct-track"></div>
+          </div>
+        </div>
+
+        <div class="calc-solution hidden" id="fyr-verdict"></div>
+
+        <div class="quiz-actions">
+          <button
+            class="btn nav-primary"
+            id="fyr-check-btn"
+            onclick="checkFyrAnswer()"
+          >
+            Rätta
+          </button>
+          <button
+            class="btn nav-primary hidden"
+            id="fyr-next-btn"
+            onclick="nextFyrQuestion()"
+          >
+            Nästa →
+          </button>
+        </div>
+      </div>
+
+      <!-- ============ FYRKARAKTÄRER RESULTS SCREEN ============ -->
+      <div id="screen-fyr-results" class="panel hidden">
+        <div class="score-hero">
+          <div
+            class="score-badge"
+            id="fyr-score-badge"
+            style="--badge-color: var(--amber)"
+          >
+            <svg viewBox="0 0 100 120" width="72" height="86">
+              <path
+                d="M30 55 L20 110 L50 95 L80 110 L70 55Z"
+                fill="var(--badge-color)"
+                opacity="0.85"
+              />
+              <circle
+                cx="50"
+                cy="42"
+                r="32"
+                fill="var(--navy)"
+                stroke="var(--badge-color)"
+                stroke-width="6"
+              />
+              <path
+                d="M50 22 L58 38 76 40 63 52 66 70 50 61 34 70 37 52 24 40 42 38Z"
+                fill="var(--badge-color)"
+              />
+            </svg>
+          </div>
+          <div class="score-num" id="fyr-score-num">0/0</div>
+          <div class="score-label">RÄTTA MÖNSTER</div>
+          <p class="score-note" id="fyr-score-note"></p>
+        </div>
+
+        <div class="actions result-actions">
+          <button class="btn big" onclick="rerunLast()">Kör igen</button>
+          <button class="btn ghost big" onclick="backToStart()">
+            Välj annan typ
+          </button>
+        </div>
+
+        <h2 class="section-title" style="margin-top: 28px">
+          Resultat per fyrkaraktär
+        </h2>
+        <div class="rule-review" id="fyr-rule-review"></div>
+      </div>
+
       <!-- ============ PROGRESS SCREEN ============ -->
       <div id="screen-progress" class="panel hidden">
         <div class="start-head-row">
@@ -549,14 +697,17 @@
     <script src="js/data/questions-signalflaggor-siffror.js"></script>
     <script src="js/data/questions-vajningssituationer.js"></script>
     <script src="js/data/questions-klass8-regelprov.js"></script>
+    <script src="js/data/questions-sjokortssymboler.js"></script>
     <script src="js/data/questions-index.js"></script>
     <script src="js/data/drill-groups.js"></script>
     <script src="js/data/cert-levels.js"></script>
+    <script src="js/data/fyrkaraktarer.js"></script>
     <script src="js/certifications.js"></script>
     <script src="js/progress-store.js"></script>
     <script src="js/setup-ui.js"></script>
     <script src="js/progress-ui.js"></script>
     <script src="js/quiz-engine.js"></script>
     <script src="js/calc-engine.js"></script>
+    <script src="js/fyr-engine.js"></script>
   </body>
 </html>

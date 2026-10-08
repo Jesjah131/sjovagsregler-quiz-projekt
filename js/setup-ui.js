@@ -5,6 +5,7 @@
 let examCount = 20;
 let drillCount = 20;
 let calcCount = 10;
+let fyrCount = 8;
 let quizTopic = null; // ämnes-/områdes-id för pågående körning (för statistik)
 let lastRun = null; // startar om samma körning ("Kör igen")
 
@@ -143,6 +144,25 @@ function renderCalcTypes() {
       .join("");
 }
 
+// Anropas första gången läget öppnas — FYRKARAKTARER laddas efter denna fil.
+function renderFyrList() {
+  const all = topicCard({
+    icon: iconBadge("fyrar", "#d9822b"),
+    name: "Blandat — slumpade karaktärer",
+    sub: `${FYRKARAKTARER.length} karaktärer i banken`,
+    onclick: "startFyrSession('all')",
+  });
+  document.getElementById("fyr-type-grid").innerHTML =
+    all +
+    FYRKARAKTARER.map((c) =>
+      topicCard({
+        icon: `<span class="swatch" style="background:#d9822b"></span>`,
+        name: c.label,
+        onclick: `startFyrSession('${c.id}')`,
+      })
+    ).join("");
+}
+
 /* ---------- chip-rader (certifikat, antal) ---------- */
 function buildChips(rowId, options, current, handler) {
   document.getElementById(rowId).innerHTML = options
@@ -177,23 +197,29 @@ function setCalcCount(v) {
   calcCount = parseInt(v, 10);
   buildChips("calc-count-row", countOptions([5, 10, 20, 30]), calcCount, "setCalcCount");
 }
+function setFyrCount(v) {
+  fyrCount = parseInt(v, 10);
+  buildChips("fyr-count-row", countOptions([4, 8, 16, 24]), fyrCount, "setFyrCount");
+}
 
 buildChips("train-cert-row", CERT_OPTIONS, trainCert, "selectTrainCert");
 buildChips("exam-cert-row", CERT_OPTIONS, examCert, "selectExamCert");
 setExamCount(examCount);
 setDrillCount(drillCount);
 setCalcCount(calcCount);
+setFyrCount(fyrCount);
 renderTrainArea();
 renderDrillGroups();
 
 /* ---------- lägesval ---------- */
 function selectMode(m) {
   mode = m;
-  ["train", "exam", "calc", "drill"].forEach((id) => {
+  ["train", "exam", "calc", "drill", "fyr"].forEach((id) => {
     document.getElementById("card-" + id).classList.toggle("active", m === id);
     document.getElementById(id + "-options").classList.toggle("hidden", m !== id);
   });
   if (m === "calc") renderCalcTypes();
+  if (m === "fyr") renderFyrList();
   // Visa alternativen direkt under lägeskorten (viktigt på små skärmar).
   requestAnimationFrame(() =>
     document
@@ -225,6 +251,8 @@ function showOnly(screenId) {
     "screen-results",
     "screen-calc",
     "screen-calc-results",
+    "screen-fyr",
+    "screen-fyr-results",
     "screen-progress",
   ].forEach((id) =>
     document.getElementById(id).classList.toggle("hidden", id !== screenId)
@@ -277,6 +305,32 @@ function startDrill(groupId) {
   beginQuiz(shuffle(pool).slice(0, Math.min(drillCount, pool.length)));
 }
 
+function startFyrSession(selId) {
+  let base;
+  if (selId === "all") {
+    base = shuffle(FYRKARAKTARER).slice(
+      0,
+      Math.min(fyrCount, FYRKARAKTARER.length)
+    );
+    while (base.length < fyrCount) {
+      base = base.concat(shuffle(FYRKARAKTARER)).slice(0, fyrCount);
+    }
+  } else {
+    const ch = FYRKARAKTARER.find((c) => c.id === selId);
+    if (!ch) return;
+    base = [ch];
+  }
+  mode = "fyr";
+  quizTopic = selId;
+  lastRun = () => startFyrSession(selId);
+  fyrQueue = base;
+  fyrCurrent = 0;
+  fyrAnswers = [];
+  showOnly("screen-fyr");
+  document.getElementById("fyr-mode-txt").textContent = "FYRKARAKTÄRER";
+  renderFyrQuestion();
+}
+
 /* ---------- navigation mellan skärmar ---------- */
 function rerunLast() {
   if (lastRun) lastRun();
@@ -299,4 +353,8 @@ function quitToStart() {
 
 function quitCalcToStart() {
   if (confirmQuit(calcAnswers.length > 0)) backToStart();
+}
+
+function quitFyrToStart() {
+  if (confirmQuit(fyrAnswers.length > 0)) backToStart();
 }
