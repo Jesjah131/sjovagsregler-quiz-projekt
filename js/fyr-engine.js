@@ -36,15 +36,51 @@ function fyrCorrectCells(char) {
 }
 
 function fyrRulerHtml() {
-  const marks = [0, 5, 10, 15, 20, 25];
-  return marks
-    .map(
-      (s) =>
-        `<span class="fyr-ruler-label" style="left:${
-          (s / FYR_TOTAL_SECONDS) * 100
-        }%">${s}s</span>`
-    )
-    .join("");
+  let html = "";
+  for (let s = 0; s <= FYR_TOTAL_SECONDS; s++) {
+    const pct = (s / FYR_TOTAL_SECONDS) * 100;
+    const isMajor = s % 5 === 0;
+    html += `<span class="fyr-tick${
+      isMajor ? " major" : ""
+    }" style="left:${pct}%"></span>`;
+    if (isMajor) {
+      html += `<span class="fyr-ruler-label" style="left:${pct}%">${s}s</span>`;
+    }
+  }
+  return html;
+}
+
+function fyrFormatSeconds(n) {
+  return n.toLocaleString("sv-SE", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+}
+
+function updateFyrLiveReadout() {
+  const el = document.getElementById("fyr-live-readout");
+  if (!el) return;
+  const onCells = fyrUserCells.filter(Boolean).length;
+  const onSeconds = onCells * FYR_RESOLUTION;
+  el.textContent = `Tänd tid: ${fyrFormatSeconds(
+    onSeconds
+  )} s av ${FYR_TOTAL_SECONDS} s`;
+}
+
+function showFyrTooltip(i) {
+  const tip = document.getElementById("fyr-time-tooltip");
+  if (!tip) return;
+  const t0 = i * FYR_RESOLUTION;
+  const t1 = t0 + FYR_RESOLUTION;
+  const pct = ((i + 0.5) / FYR_CELLS) * 100;
+  tip.style.left = `${pct}%`;
+  tip.textContent = `${fyrFormatSeconds(t0)}–${fyrFormatSeconds(t1)} s`;
+  tip.classList.remove("hidden");
+}
+
+function hideFyrTooltip() {
+  const tip = document.getElementById("fyr-time-tooltip");
+  if (tip) tip.classList.add("hidden");
 }
 
 function fyrRowHtml(cells, mode) {
@@ -65,6 +101,7 @@ function renderFyrUserTrack() {
     fyrUserCells,
     "user"
   );
+  updateFyrLiveReadout();
 }
 
 function cellIndexFromEvent(trackEl, clientX) {
@@ -82,18 +119,21 @@ function fyrPointerDown(e) {
   fyrUserCells[i] = fyrPaintValue;
   fyrPainting = true;
   renderFyrUserTrack();
+  showFyrTooltip(i);
 }
 function fyrPointerMove(e) {
-  if (!fyrPainting || fyrChecked) return;
+  if (fyrChecked) return;
   const track = document.getElementById("fyr-user-track");
   const i = cellIndexFromEvent(track, e.clientX);
-  if (fyrUserCells[i] !== fyrPaintValue) {
+  if (fyrPainting && fyrUserCells[i] !== fyrPaintValue) {
     fyrUserCells[i] = fyrPaintValue;
     renderFyrUserTrack();
   }
+  if (fyrPainting) showFyrTooltip(i);
 }
 function fyrPointerUp() {
   fyrPainting = false;
+  hideFyrTooltip();
 }
 
 function fyrClearTrack() {
@@ -126,6 +166,7 @@ function renderFyrQuestion() {
 
   document.getElementById("fyr-ruler").innerHTML = fyrRulerHtml();
   renderFyrUserTrack();
+  hideFyrTooltip();
   document.getElementById("fyr-correct-wrap").classList.add("hidden");
   document.getElementById("fyr-correct-track").innerHTML = "";
   document.getElementById("fyr-verdict").classList.add("hidden");

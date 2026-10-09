@@ -6,6 +6,8 @@ let examCount = 20;
 let drillCount = 20;
 let calcCount = 10;
 let fyrCount = 8;
+let trainCount = 20;
+const TRAIN_COUNT_MAX = 60; // slidern i topp-läge = alla frågor i ämnet (obegränsat)
 let quizTopic = null; // ämnes-/områdes-id för pågående körning (för statistik)
 let lastRun = null; // startar om samma körning ("Kör igen")
 
@@ -201,6 +203,11 @@ function setFyrCount(v) {
   fyrCount = parseInt(v, 10);
   buildChips("fyr-count-row", countOptions([4, 8, 16, 24]), fyrCount, "setFyrCount");
 }
+function setTrainCount(v) {
+  trainCount = parseInt(v, 10);
+  document.getElementById("train-count-label").textContent =
+    trainCount >= TRAIN_COUNT_MAX ? "Alla frågor" : `${trainCount} frågor`;
+}
 
 buildChips("train-cert-row", CERT_OPTIONS, trainCert, "selectTrainCert");
 buildChips("exam-cert-row", CERT_OPTIONS, examCert, "selectExamCert");
@@ -208,6 +215,7 @@ setExamCount(examCount);
 setDrillCount(drillCount);
 setCalcCount(calcCount);
 setFyrCount(fyrCount);
+setTrainCount(trainCount);
 renderTrainArea();
 renderDrillGroups();
 
@@ -277,7 +285,12 @@ function startTrain(topicId) {
   quizTopic = topicId;
   recallMode = document.getElementById("recall-mode-toggle").checked;
   lastRun = () => startTrain(topicId);
-  beginQuiz(shuffle(qs));
+  const shuffled = shuffle(qs);
+  const n =
+    trainCount >= TRAIN_COUNT_MAX
+      ? shuffled.length
+      : Math.min(trainCount, shuffled.length);
+  beginQuiz(shuffled.slice(0, n));
 }
 
 function startExam() {

@@ -234,6 +234,39 @@
     border-left:3px solid var(--amber);padding:8px 12px;background:rgba(255,255,255,0.02);
   }
 
+  /* antal frågor-slider (träningsläge) */
+  .train-count-row{display:flex;align-items:center;gap:14px;margin-bottom:6px;}
+  .train-count-value{
+    font-family:var(--mono);font-weight:600;font-size:.92rem;color:var(--white-light);
+    min-width:78px;text-align:right;flex:none;
+  }
+  .train-count-slider{
+    flex:1 1 auto;-webkit-appearance:none;appearance:none;
+    height:36px;background:transparent;cursor:pointer;touch-action:pan-y;
+  }
+  .train-count-slider:focus{outline:none;}
+  .train-count-slider::-webkit-slider-runnable-track{
+    height:6px;border-radius:3px;background:var(--navy-line);
+  }
+  .train-count-slider::-moz-range-track{
+    height:6px;border-radius:3px;background:var(--navy-line);
+  }
+  .train-count-slider::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;
+    width:24px;height:24px;border-radius:50%;
+    background:var(--amber);border:3px solid var(--navy-deep);
+    box-shadow:0 0 0 1px var(--amber);
+    margin-top:-9px;cursor:pointer;transition:transform .1s;
+  }
+  .train-count-slider::-webkit-slider-thumb:active{transform:scale(1.15);}
+  .train-count-slider::-moz-range-thumb{
+    width:24px;height:24px;border-radius:50%;
+    background:var(--amber);border:3px solid var(--navy-deep);
+    box-shadow:0 0 0 1px var(--amber);
+    cursor:pointer;transition:transform .1s;
+  }
+  .train-count-slider::-moz-range-thumb:active{transform:scale(1.15);}
+
   /* fundera-läge (omkopplare) */
   .recall-toggle{
     display:flex;align-items:center;gap:14px;cursor:pointer;min-height:64px;
@@ -390,9 +423,12 @@
 
   /* ---------- fyrkaraktärer: tidsaxel-övning ---------- */
   .fyr-axis{margin:18px 0 8px;}
-  .fyr-ruler{position:relative;height:20px;margin-bottom:4px;}
-  .fyr-ruler-label{position:absolute;top:0;transform:translateX(-50%);font-family:var(--mono);font-size:.72rem;color:var(--foam-dim);}
+  .fyr-ruler{position:relative;height:30px;margin-bottom:4px;}
+  .fyr-tick{position:absolute;top:0;width:1px;height:7px;background:rgba(255,255,255,0.22);transform:translateX(-50%);}
+  .fyr-tick.major{height:12px;width:1.5px;background:var(--foam-dim);}
+  .fyr-ruler-label{position:absolute;top:14px;transform:translateX(-50%);font-family:var(--mono);font-size:.72rem;font-weight:600;color:var(--foam-dim);}
   .fyr-row-caption{font-size:.8rem;color:var(--foam-dim);margin:10px 0 4px;}
+  .fyr-track-wrap{position:relative;}
   .fyr-row{
     display:flex;
     width:100%;
@@ -413,7 +449,37 @@
   .fyr-cell.match.was-off{background:var(--navy-deep);}
   .fyr-cell.mismatch.was-on{background:var(--port-red);}
   .fyr-cell.mismatch.was-off{background:var(--port-red-dim);}
-  .fyr-row-actions{display:flex;justify-content:flex-end;margin-top:8px;}
+  /* sekund-rutnät ovanpå rutorna: svaga linjer var 1:a sekund, starkare var 5:e */
+  .fyr-gridlines{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    border-radius:8px;
+    overflow:hidden;
+    mix-blend-mode:difference;
+    background-image:
+      repeating-linear-gradient(to right, rgba(255,255,255,.55) 0, rgba(255,255,255,.55) 1.5px, transparent 1.5px, transparent 20%),
+      repeating-linear-gradient(to right, rgba(255,255,255,.25) 0, rgba(255,255,255,.25) 1px, transparent 1px, transparent 4%);
+  }
+  .fyr-time-tooltip{
+    position:absolute;
+    top:-30px;
+    transform:translateX(-50%);
+    background:var(--navy-deep);
+    border:1px solid var(--amber);
+    color:var(--amber);
+    font-family:var(--mono);
+    font-size:.74rem;
+    font-weight:600;
+    padding:2px 7px;
+    border-radius:5px;
+    white-space:nowrap;
+    pointer-events:none;
+    z-index:5;
+  }
+  .fyr-time-tooltip.hidden{display:none;}
+  .fyr-row-actions{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 10px;margin-top:8px;}
+  .fyr-live-readout{font-family:var(--mono);font-size:.82rem;color:var(--foam);margin:0;}
   .fyr-correct-wrap{margin-top:14px;}
 
   /* ---------- resultat ---------- */

@@ -217,6 +217,27 @@
           <div class="cert-row" id="train-cert-row"></div>
           <p class="cert-note" id="train-cert-note"></p>
 
+          <h2 class="section-title">Antal frågor</h2>
+          <div class="train-count-row">
+            <input
+              type="range"
+              id="train-count-slider"
+              class="train-count-slider"
+              min="5"
+              max="60"
+              step="5"
+              value="20"
+              oninput="setTrainCount(this.value)"
+              aria-label="Antal frågor i träningspasset"
+            />
+            <span class="train-count-value" id="train-count-label"
+              >20 frågor</span
+            >
+          </div>
+          <p class="cert-note">
+            Dra till max för att alltid köra alla frågor i ämnet.
+          </p>
+
           <label class="recall-toggle">
             <input
               type="checkbox"
@@ -570,15 +591,23 @@
         <div class="fyr-axis">
           <div class="fyr-ruler" id="fyr-ruler"></div>
           <p class="fyr-row-caption">Din teckning (klicka eller dra för att tända/släcka)</p>
-          <div class="fyr-row fyr-row-user" id="fyr-user-track"></div>
+          <div class="fyr-track-wrap">
+            <div class="fyr-row fyr-row-user" id="fyr-user-track"></div>
+            <div class="fyr-gridlines" aria-hidden="true"></div>
+            <div class="fyr-time-tooltip hidden" id="fyr-time-tooltip"></div>
+          </div>
           <div class="fyr-row-actions">
+            <p class="fyr-live-readout" id="fyr-live-readout">Tänd tid: 0,0 s av 25 s</p>
             <button class="btn ghost small" onclick="fyrClearTrack()">
               Rensa
             </button>
           </div>
           <div class="fyr-correct-wrap hidden" id="fyr-correct-wrap">
             <p class="fyr-row-caption">Facit</p>
-            <div class="fyr-row fyr-row-correct" id="fyr-correct-track"></div>
+            <div class="fyr-track-wrap">
+              <div class="fyr-row fyr-row-correct" id="fyr-correct-track"></div>
+              <div class="fyr-gridlines" aria-hidden="true"></div>
+            </div>
           </div>
         </div>
 
